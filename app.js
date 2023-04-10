@@ -35,7 +35,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
-// router set
+// router set 
+// all router
 
 app.use("/api/user", router);
 app.use("/admin", adminRouter);
