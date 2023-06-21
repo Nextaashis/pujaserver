@@ -1,82 +1,114 @@
-import adminModel from '../moduls/adminModul.js'
-import bcrypt from 'bcryptjs';
-
-const adminfrom = (req, res) => {
-  res.render("admin/adminRegister.ejs");
-};
+import adminModel from "../moduls/adminModul.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const createadmin = async (req, res) => {
-     const{ name, email, password, comfrimpassword} = req.body;
-      if (name && email && password && comfrimpassword) {
-        const findEmail = await adminModel.find({email:email});
-        if (findEmail){
-           res.send({
-             ststuse: "failed",
-             message: "Email already used Please use anothe email.",
-           });
-
-        }else{
+ 
+  const { name, email, password, comfrimpassword } = req.body;
+ 
+  if (name && email && password && comfrimpassword) {
+        try {
           if (password === comfrimpassword) {
-            try {
-              const salt = await bcrypt.genSalt(10);
-              const hashPassword = await bcrypt.hash(password, salt);
-              const adminCreate = await adminModel.create({
-                name,
-                email,
-                password: hashPassword,
-                comfrimpassword: hashPassword,
-              });
-
-              res.render("admin/adminRegister.ejs");
-            } catch (error) {
-              console.log(error.message);
-            }
-          } else {
+            const salt = await bcrypt.genSalt(10);
+            const hashPassword = await bcrypt.hash(password, salt);
+            const adminCreate = await adminModel.create({
+              name,
+              email,
+              password: hashPassword,
+              comfrimpassword: hashPassword,
+            });
+            res.send({
+              "statuse": "sucess",
+              message: "Create admin account.",
+            });
+          }else {
             res.send({
               ststuse: "failed",
               message: "Pasword not match.",
             });
           }
+        } catch (error) {
+          console.log(error.message);
         }
-      } else {
-        res.send({
-          ststuse: "failed",
-          message: "All Feiled required",
-        });
-      }
+      }else {
+    res.send({
+      ststuse: "failed",
+      message: "All Feiled required",
+    });
+  }
 };
 
 const showadmin = async (req, res) => {
-   try{
+  try {
     const adminList = await adminModel.find();
 
-
-    res.render("admin/adminProfile.ejs", {data: adminList});
-   }catch(error){
-    res.send(error.message)
-   }
-    
-};
-// const editadmin = (req, res) => {
-//     res.render("admin/adminEdit.ejs")
-// };
-// 
-// const updateadmin = (req, res) => {};
-
-const deleteadmin = async(req, res) => {
-  try {
-    const adminDelet = await  adminModel.findByIdAndDelete(req.params.id);
-    res.redirect('/admin/admin');
+    res.send(adminList);
   } catch (error) {
     res.send(error.message);
   }
 };
 
-export {
-  adminfrom,
-  createadmin,
-  showadmin,
- 
+async function deleteadmin(req, res) {
+  try {
+    const adminDelet = await adminModel.findByIdAndDelete(req.params.id);
+
+    res.send({
+      ststuse: "sucess",
+      message: "Delete admin.",
+    });
+  } catch (error) {
+    res.send(error.message);
+  }
+}
+
+const loginAdmin = async (req, res) => {
   
-  deleteadmin,
+  const { email, password } = req.body;
+  if (email && password) {
+    const findEmail = await adminModel.findOne({ email: email });
+    if (findEmail) {
+      try {
+        const passswordCompair = await bcrypt.compare(
+          password,
+          findEmail.password
+        );
+        if (passswordCompair) {
+          const token = jwt.sign(
+            { userID: findEmail._id },
+            process.env.jwtKey,
+            {
+              expiresIn: "5d",
+            }
+          );
+
+          res.send({
+            status: "Success",
+            message: "You are login.",
+            token: token,
+          });
+
+          console.log(token);
+        } else {
+          res.send({
+            ststuse: "failed",
+            message: "Woring Password.",
+          });
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
+    } else {
+      res.send({
+        ststuse: "failed",
+        message: "Email Not found",
+      });
+    }
+  } else {
+    res.send({
+      ststuse: "failed",
+      message: "All Feiled required",
+    });
+  }
 };
+
+export { loginAdmin, createadmin, showadmin, deleteadmin };

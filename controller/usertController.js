@@ -5,10 +5,10 @@ import bcrypt from "bcryptjs";
 
 //  admin user Registaer user create
 
-const adminUserCreate = async (req, res) => {
-  const { name, email, password, confirmPassword, tc } = req.body;
+const userCreate = async (req, res) => {
+  const { name, email, password } = req.body;
 
-  if (name && email && password && confirmPassword && tc) {
+  if (name && email && password) {
     const findEmail = await adminUserModel.findOne({ email: email });
 
     if (findEmail) {
@@ -17,7 +17,7 @@ const adminUserCreate = async (req, res) => {
         message: "This email already used Please use next email.",
       });
     } else {
-      if (password === confirmPassword) {
+     
         try {
           const salt = await bcrypt.genSalt(10);
           const hasPassword = await bcrypt.hash(password, salt);
@@ -25,8 +25,7 @@ const adminUserCreate = async (req, res) => {
             name,
             email,
             password: hasPassword,
-            confirmPassword: hasPassword,
-            tc,
+            
           });
 
           const letest_saveAdmin = await adminUserModel.findOne({
@@ -44,13 +43,10 @@ const adminUserCreate = async (req, res) => {
             message: "You are ragister.",
             token: token,
           });
-        } catch (error) {}
-      } else {
-        res.status(404).send({
-          status: "Faild",
-          message: "Password not match.",
-        });
-      }
+        } catch (error) {
+          console.log(error.message)
+        }
+     
     }
   } else {
     res.status(404).send({
@@ -62,7 +58,7 @@ const adminUserCreate = async (req, res) => {
 
 // Ragister admin user login
 
-const adminLogin = async (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (email && password) {
@@ -213,8 +209,8 @@ const adminResetPasswordEmail = async (req, res) => {
 };
 
 export {
-  adminUserCreate,
-  adminLogin,
+  userCreate,
+  login,
   changePassword,
   adminProfile,
   adminResetPassword,

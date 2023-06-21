@@ -1,14 +1,14 @@
 import express from "express";
 const router = express.Router();
 import {
-  adminUserCreate,
-  adminLogin,
+  userCreate,
+  login,
   changePassword,
   adminProfile,
   adminResetPassword,
   adminResetPasswordEmail,
 } from "../controller/usertController.js"; 
-import checkAuthUser from "../middlerware/adminMiddlerware.js";
+import checkAuthUser from "../middlerware/userMiddlerware.js";
 
 // Route level middleware
 
@@ -17,8 +17,8 @@ router.post("/adminprofile", checkAuthUser);
 
 // Public Router
 
-router.post("/register", adminUserCreate);
-router.post("/login", adminLogin);
+router.post("/register", userCreate);
+router.post("/login", login);
 
 // Login protected Router
 

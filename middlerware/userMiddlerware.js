@@ -1,10 +1,11 @@
 import jwt from "jsonwebtoken";
 import adminUser from "../moduls/userModuls.js";
 
+
 const checkAuthUser = async (req, res, next) => {
   let token;
   const { authorization } = req.headers;
-  if (authorization && authorization.startsWidth("Bearer")) {
+    if (authorization && authorization.startsWidth("Bearer")) {
     try {
       token = authorization.split(" ")[1];
       // Verify token
@@ -24,5 +25,6 @@ const checkAuthUser = async (req, res, next) => {
     }
   }
 };
+
 
 export default checkAuthUser;
